@@ -14,15 +14,13 @@ public class UserDB {
     public static void insert(User user) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction trans = em.getTransaction();
-        trans.begin();
         try {
+            trans.begin();
             em.persist(user);
             trans.commit();
         } catch (Exception e) {
             System.out.println("Insert error: " + e.getMessage());
-            if (trans.isActive()) {
-                trans.rollback();
-            }
+            if (trans.isActive()) trans.rollback();
         } finally {
             em.close();
         }
@@ -32,15 +30,14 @@ public class UserDB {
     public static void update(User user) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction trans = em.getTransaction();
-        trans.begin();
         try {
+            trans.begin();
+            // merge sẽ trả về một entity "managed" -> nên gán lại nếu cần
             em.merge(user);
             trans.commit();
         } catch (Exception e) {
             System.out.println("Update error: " + e.getMessage());
-            if (trans.isActive()) {
-                trans.rollback();
-            }
+            if (trans.isActive()) trans.rollback();
         } finally {
             em.close();
         }
@@ -50,15 +47,16 @@ public class UserDB {
     public static void delete(User user) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction trans = em.getTransaction();
-        trans.begin();
         try {
-            em.remove(em.merge(user)); // merge để đảm bảo user nằm trong context
+            trans.begin();
+            User managed = em.find(User.class, user.getUserId()); 
+            if (managed != null) {
+                em.remove(managed);
+            }
             trans.commit();
         } catch (Exception e) {
             System.out.println("Delete error: " + e.getMessage());
-            if (trans.isActive()) {
-                trans.rollback();
-            }
+            if (trans.isActive()) trans.rollback();
         } finally {
             em.close();
         }
@@ -90,15 +88,13 @@ public class UserDB {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         String qString = "SELECT u FROM User u ORDER BY u.userId";
         TypedQuery<User> q = em.createQuery(qString, User.class);
-
-        List<User> users = null;
         try {
-            users = q.getResultList();
+            return q.getResultList();
         } catch (Exception e) {
             System.out.println("Select users error: " + e.getMessage());
+            return null;
         } finally {
             em.close();
         }
-        return users;
     }
 }
