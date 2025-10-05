@@ -20,7 +20,9 @@ public class UserDB {
             trans.commit();
         } catch (Exception e) {
             System.out.println("Insert error: " + e.getMessage());
-            trans.rollback();
+            if (trans.isActive()) {
+                trans.rollback();
+            }
         } finally {
             em.close();
         }
@@ -36,7 +38,9 @@ public class UserDB {
             trans.commit();
         } catch (Exception e) {
             System.out.println("Update error: " + e.getMessage());
-            trans.rollback();
+            if (trans.isActive()) {
+                trans.rollback();
+            }
         } finally {
             em.close();
         }
@@ -52,7 +56,9 @@ public class UserDB {
             trans.commit();
         } catch (Exception e) {
             System.out.println("Delete error: " + e.getMessage());
-            trans.rollback();
+            if (trans.isActive()) {
+                trans.rollback();
+            }
         } finally {
             em.close();
         }
